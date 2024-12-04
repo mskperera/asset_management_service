@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  submit-jokes:
+    build: .
+    image: submit-jokes-microservice
+    ports:
+      - "8002:8002"
+    volumes:
+      - .:/usr/src/app
+    command: ["node", "server.js"]
+    env_file: 
+    - ./.env
+
+# docker-compose up: Builds the images (if not already built) and starts the containers.
+
+# docker-compose build: Explicitly builds the images without starting the containers.
+
+# docker-compose up --build: To build the image with the latest changes and start the service, run:
+
+# Running in detached mode (optional): If you want to run the containers in the background, add the -d flag: docker-compose up --build -d
+
+# To stop the services, run:docker-compose down
