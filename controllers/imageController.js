@@ -2,7 +2,7 @@ const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
 const { generateHash } = require('../utils/hashGenerator');
-const { saveFileInfo } = require('../utils/fileService');
+const { saveFileInfo, commitFile } = require('../utils/fileService');
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR; // Default to 'public/uploads' if the env variable is not set
 
@@ -53,6 +53,30 @@ exports.uploadImage = async (req, res) => {
   }
 };
 
+
+exports.commitFileUpload = async (req, res) => {
+  try {
+   const {fileHash}=req.body;
+
+   console.log('filehash',fileHash);
+   if(!fileHash)
+   {
+      return res.status(400).json({ error: 'fileHash is required' });
+    }
+
+    
+   const result=await commitFile(fileHash);
+if(result.exception){
+  return res.status(400).json({ error: result.exception });
+}
+   console.log('result',result);
+   return res.json(result);
+
+  } catch (error) {
+    console.error('Error during image processing:', error);
+    return res.status(500).json({ error: 'Error processing the image' });
+  }
+};
 
 // exports.uploadImage = async (req, res) => {
 //     try {
