@@ -1,10 +1,10 @@
-version: '3.8'
+
 services:
-  submit-jokes:
+  asset-service:
     build: .
-    image: submit-jokes-microservice
+    image: asset-service-image
     ports:
-      - "8002:8002"
+      - "8010:8010"
     volumes:
       - .:/usr/src/app
     command: ["node", "server.js"]

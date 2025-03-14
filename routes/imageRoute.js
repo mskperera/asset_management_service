@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { uploadImage } = require('../controllers/imageController');
+const { uploadImage, commitFileUpload } = require('../controllers/imageController');
 
 // Setup multer for handling file uploads
 const upload = multer({
@@ -19,5 +19,9 @@ const router = express.Router();
 
 // Define the upload image endpoint
 router.post('/upload-image', upload.single('file'), uploadImage);
+
+
+router.post('/imageUpload/commitFile',commitFileUpload);
+
 
 module.exports = router;
