@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { uploadImage, commitFileUpload } = require('../controllers/imageController');
+const { uploadImage, commitFileUpload, deleteUncommittedFiles_ctrl } = require('../controllers/imageController');
 
 // Setup multer for handling file uploads
 const upload = multer({
@@ -23,5 +23,8 @@ router.post('/upload-image', upload.single('file'), uploadImage);
 
 router.post('/imageUpload/commitFile',commitFileUpload);
 
+router.post('/imageUpload/commitFile',commitFileUpload);
+
+router.post('/imageUpload/deleteUncommittedFiles',deleteUncommittedFiles_ctrl);
 
 module.exports = router;
