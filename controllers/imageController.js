@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { generateHash } = require('../utils/hashGenerator');
 const { saveFileInfo, commitFile } = require('../utils/fileService');
+const { pool } = require('../mysql/models/imageModel');
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR; // Default to 'public/uploads' if the env variable is not set
 
@@ -75,6 +76,61 @@ if(result.exception){
   } catch (error) {
     console.error('Error during image processing:', error);
     return res.status(500).json({ error: 'Error processing the image' });
+  }
+};
+
+
+
+
+exports.deleteUncommittedFiles_ctrl = async (req, res) => {
+  try {
+
+   const result= await deleteUncommittedFiles();
+ 
+   console.log('result',result);
+   return res.json(result);
+
+  } catch (error) {
+    console.error('Error during image processing:', error);
+    return res.status(500).json({ error: 'Error processing the image' });
+  }
+};
+
+// Function to delete uncommitted files
+const deleteUncommittedFiles = async () => {
+  try {
+    // Get all uncommitted files
+    const [files] = await pool.query(
+      'SELECT hash, file_path FROM images WHERE isCommitted = 0'
+    );
+
+    if (files.length === 0) {
+      return { message: 'No uncommitted files to delete.' };
+    }
+
+    let deletedFiles = [];
+
+    // Loop through each file and delete it
+    for (const file of files) {
+      try {
+        // Ensure the file path is safe
+        const filePath = path.resolve(file.file_path);
+
+        // Delete the file from the file system
+        await fs.unlink(filePath);
+
+        // Remove file record from the database
+      //  await pool.query('DELETE FROM images WHERE hash = ?', [file.hash]);
+
+        deletedFiles.push(filePath);
+      } catch (fileError) {
+        console.error(`Error deleting file ${file.file_path}:`, fileError.message);
+      }
+    }
+
+    return { message: 'Deleted uncommitted files.', deletedFiles };
+  } catch (err) {
+    throw new Error('Error deleting uncommitted files: ' + err.message);
   }
 };
 
