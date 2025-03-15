@@ -14,7 +14,7 @@ const saveFileInfo = async (fileHash, fileName, filePath, folderPath, isResized 
   }
 };
 
-// Function to save file information into the database
+
 const commitFile = async (fileHash) => {
   try {
     // Check if the hash exists in the table
@@ -39,9 +39,44 @@ const commitFile = async (fileHash) => {
   }
 };
 
+
+const markFileAsToBeDeleted_sql = async (fileHash) => {
+  try {
+    // Check if the hash exists in the table
+    const [existing] = await pool.query(
+      'SELECT COUNT(*) AS count FROM images WHERE hash = ?',
+      [fileHash]
+    );
+
+    if (existing[0].count === 0) {
+      return {exception:'File hash does not exist in the database.'};
+    }
+
+    // Proceed with updating if the hash exists
+    const [result] = await pool.query(
+      'UPDATE images SET toBeDeleted = 1 WHERE hash = ?',
+      [fileHash]
+    );
+
+    return result;
+  } catch (err) {
+    throw new Error('Error committing file: ' + err.message);
+  }
+};
+
+
 const isFileCommitted = async (fileHash) => {
   const [result] = await pool.query(
     'SELECT COUNT(*) AS count FROM images WHERE hash = ? AND isCommitted = 1',
+    [fileHash]
+  );
+
+  return result[0].count > 0;
+};
+
+const isFileMarkedAsToBeDeleted = async (fileHash) => {
+  const [result] = await pool.query(
+    'SELECT COUNT(*) AS count FROM images WHERE hash = ? AND toBeDeleted = 1',
     [fileHash]
   );
 
@@ -53,7 +88,7 @@ const getAllUncommitedFileData = async () => {
   try {
    // Get all uncommitted files
    const [files] = await pool.query(
-    'SELECT hash, file_path FROM images WHERE isCommitted = 0'
+    'SELECT hash, file_path,folder_path FROM images WHERE isCommitted = 0'
   );
 
   // if (files.length === 0) {
@@ -66,10 +101,30 @@ const getAllUncommitedFileData = async () => {
   }
 };
 
+
+const getAllFileDataToBeDeleted = async () => {
+  try {
+   // Get all uncommitted files
+   const [files] = await pool.query(
+    'SELECT hash, file_path,folder_path FROM images WHERE toBeDeleted =1'
+  );
+
+  // if (files.length === 0) {
+  //   return { message: 'No uncommitted files to delete.' };
+  // }
+
+ return files;
+  } catch (err) {
+    throw new Error('Error committing file: ' + err.message);
+  }
+};
+
+
+
 const getFileDataByFileHash = async (fileHash) => {
   try {
     const [files] = await pool.query(
-      'SELECT hash, file_path FROM images WHERE hash = ?',
+      'SELECT hash, file_path,folder_path FROM images WHERE hash = ?',
       [fileHash]
     );
 
@@ -96,7 +151,18 @@ const deleteFileDataByFileHash = async (fileHash) => {
     throw new Error('Error deleting file record: ' + err.message);
   }
 };
+const fetchImageFromDatabase = async (hash) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM images WHERE hash = ?', [hash]);
 
+    const image = rows[0];
+
+    return image;
+  } catch (err) {
+    console.error('Database error while fetching image:', err);
+    return { status: 500, message: 'Internal server error' };
+  }
+};
 
 
 
@@ -106,5 +172,9 @@ module.exports = {
   getAllUncommitedFileData,
   getFileDataByFileHash,
   deleteFileDataByFileHash,
-  isFileCommitted
+  isFileCommitted,
+  fetchImageFromDatabase,
+  getAllFileDataToBeDeleted,
+  markFileAsToBeDeleted_sql,
+  isFileMarkedAsToBeDeleted
 };
