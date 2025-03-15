@@ -269,6 +269,7 @@ const processImageRequest_srv = async (hash, width, height, quality) => {
     if (!imageResponse) {
       return { exception: "No image found." };
     }
+    
     const file_path_toFowardSlash = imageResponse.file_path;//.replace(/\//g, "\\");
     const originalFilePath = `${imageResponse.folder_path}/${file_path_toFowardSlash}`;
 
