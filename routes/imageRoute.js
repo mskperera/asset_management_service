@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { uploadImage, commitFileUpload, deleteUncommittedFiles_ctrl } = require('../controllers/imageController');
+const { uploadImage, commitFileUpload, deleteUncommittedFiles_ctrl, deleteFile_ctrl } = require('../controllers/imageController');
 
 // Setup multer for handling file uploads
 const upload = multer({
@@ -14,17 +14,14 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // Max file size 10MB
 });
 
-// Create an Express Router
 const router = express.Router();
-
-// Define the upload image endpoint
 router.post('/upload-image', upload.single('file'), uploadImage);
 
 
 router.post('/imageUpload/commitFile',commitFileUpload);
 
-router.post('/imageUpload/commitFile',commitFileUpload);
-
 router.post('/imageUpload/deleteUncommittedFiles',deleteUncommittedFiles_ctrl);
+
+router.delete('/imageUpload/deleteFile',deleteFile_ctrl);
 
 module.exports = router;

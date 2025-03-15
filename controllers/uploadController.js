@@ -4,7 +4,7 @@ const sharp = require('sharp');
 const pool = require('../mysql/models/imageModel');
 const { generateHash } = require('../utils/hashGenerator');
 const { resizeImage } = require('../utils/imageProcessor');
-const { saveFileInfo } = require('../utils/fileService');
+const { saveFileInfo } = require('../sql/file');
 
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR;
