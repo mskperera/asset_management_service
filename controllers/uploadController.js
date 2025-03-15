@@ -4,50 +4,10 @@ const sharp = require('sharp');
 const pool = require('../mysql/models/imageModel');
 const { generateHash } = require('../utils/hashGenerator');
 const { resizeImage } = require('../utils/imageProcessor');
-const { saveFileInfo } = require('../utils/fileService');
+const { saveFileInfo } = require('../sql/file');
 
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR;
-
-// exports.uploadFile = async (req, res) => {
-//   try {
-//     if (!req.file) return res.status(400).json({ error: 'No file provided.' });
-
-//     const fileHash = generateHash(req.file.originalname);
-//     const filePath = path.join(UPLOAD_DIR, req.file.filename);
-
-//     // Insert file info into the database
-//     const [result] = await pool.query(
-//       'INSERT INTO images (hash, file_name, file_path) VALUES (?, ?, ?)',
-//       [fileHash, req.file.originalname, filePath]
-//     );
-
-//     res.json({ hash: fileHash, fileName: req.file.originalname });
-//   } catch (err) {
-//     console.error('Error uploading file:', err);
-//     res.status(500).json({ error: 'Internal server error.' });
-//   }
-// };
-
-
-// exports.uploadFile = async (req, res) => {
-//   try {
-//     if (!req.file) return res.status(400).json({ error: 'No file provided.' });
-
-//     const fileHash = generateHash(req.file.originalname);
-//     const filePath = path.join(UPLOAD_DIR, req.file.filename);
-
-//     // Use the saveFileInfo function to insert file data into the database
-//     await saveFileInfo(fileHash, req.file.originalname, filePath);
-
-//     // Respond with the file hash and name
-//     res.json({ hash: fileHash, fileName: req.file.originalname });
-//   } catch (err) {
-//     console.error('Error uploading file:', err);
-//     res.status(500).json({ error: 'Internal server error.' });
-//   }
-// };
-
 
 exports.uploadFile = async (req, res) => {
   try {
@@ -74,54 +34,33 @@ exports.uploadFile = async (req, res) => {
 };
 
 
-exports.viewImage = async (req, res) => {
-  const { hash } = req.params;
-  const { width, height, quality } = req.query;
 
-  try {
-    // Fetch the image from the database
-    const [rows] = await pool.query('SELECT * FROM images WHERE hash = ?', [hash]);
-    if (rows.length === 0) return res.status(404).json({ error: 'Image not found.' });
 
-    const image = rows[0];
-    const originalFilePath = image.file_path;
 
-    let filePath = originalFilePath;
 
-    if (width || height || quality) {
-      // Resize and save the image to the temporary directory
-      filePath = await resizeImage(originalFilePath, +width || null, +height || null, +quality || 80);
-    }
-
-    // Send the resized or original image file
-    res.sendFile(filePath);
-  } catch (err) {
-    console.error('Error viewing image:', err);
-    res.status(500).json({ error: 'Internal server error.' });
-  }
-};
 // exports.viewImage = async (req, res) => {
 //   const { hash } = req.params;
 //   const { width, height, quality } = req.query;
 
 //   try {
+//     // Fetch the image from the database
 //     const [rows] = await pool.query('SELECT * FROM images WHERE hash = ?', [hash]);
 //     if (rows.length === 0) return res.status(404).json({ error: 'Image not found.' });
 
 //     const image = rows[0];
-//     let filePath = image.file_path;
+//     const originalFilePath =`${image.folder_path}/${image.file_path}`;
+// console.log('originalFilePath:',originalFilePath)
+//     let filePath = originalFilePath;
 
 //     if (width || height || quality) {
-//       filePath = await resizeImage(image.file_path, +width || null, +height || null, +quality || 80);
+//       // Resize and save the image to the temporary directory
+//       filePath = await resizeImage(originalFilePath, +width || null, +height || null, +quality || 80);
 //     }
 
+//     // Send the resized or original image file
 //     res.sendFile(filePath);
 //   } catch (err) {
 //     console.error('Error viewing image:', err);
 //     res.status(500).json({ error: 'Internal server error.' });
 //   }
 // };
-
-
-
-
