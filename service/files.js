@@ -63,12 +63,13 @@ const uploadImage_srv = async (file, folderPath) => {
     // Save file info in the database
     try {
       console.log("folderPathhhhhhhhhhhhh:", folderPath, file.originalname);
-      const filePath = path.join(
-        folderPath,
-        `${timestamp}-${file.originalname}`
-      );
+      // const filePath = path.join(
+      //   folderPath,
+      //   `${timestamp}-${file.originalname}`
+      // );
+      const filePath = path.posix.join(folderPath, `${timestamp}-${file.originalname}`);
 
-      const folderPath_toFowardSlash = UPLOAD_DIR.replace(/\//g, "\\");
+      const folderPath_toFowardSlash = UPLOAD_DIR;//.replace(/\//g, "\\");
       await saveFileInfo(
         fileHash,
         file.originalname,
@@ -110,7 +111,7 @@ const deleteFile = async (fileHash) => {
     console.log("getFileDataByFileHash:", file);
 
     try {
-      const file_path = `${file.folder_path}\\${file.file_path}`;
+      const file_path = `${file.folder_path}/${file.file_path}`;
       const filePath = path.resolve(file_path);
 
       console.log("Resolved file path:", filePath);
@@ -159,7 +160,7 @@ const deleteUncommittedFiles = async () => {
 
     for (const file of files) {
       try {
-        const file_path = `${file.folder_path}\\${file.file_path}`;
+        const file_path = `${file.folder_path}/${file.file_path}`;
         const filePath = path.resolve(file_path);
         console.log("filePath", filePath);
 
@@ -238,7 +239,7 @@ const deleteFilesMarkedAsToBeDeleted_srv = async () => {
 
     for (const file of files) {
       try {
-        const file_path = `${file.folder_path}\\${file.file_path}`;
+        const file_path = `${file.folder_path}/${file.file_path}`;
         const filePath = path.resolve(file_path);
         console.log("filePath", filePath);
 
@@ -268,8 +269,9 @@ const processImageRequest_srv = async (hash, width, height, quality) => {
     if (!imageResponse) {
       return { exception: "No image found." };
     }
-    const file_path_toFowardSlash = imageResponse.file_path.replace(/\//g, "\\");
-    const originalFilePath = `${imageResponse.folder_path}\\${file_path_toFowardSlash}`;
+    
+    const file_path_toFowardSlash = imageResponse.file_path;//.replace(/\//g, "\\");
+    const originalFilePath = `${imageResponse.folder_path}/${file_path_toFowardSlash}`;
 
     let filePath = originalFilePath;
     if (width || height || quality) {
